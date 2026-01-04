@@ -11,6 +11,68 @@ from google.oauth2.service_account import Credentials
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="Pro Trading Journal", layout="wide", page_icon="📈")
 
+# --- PASSWORTSCHUTZ ---
+def check_password():
+    """Prüft ob das Passwort korrekt ist"""
+    
+    def password_entered():
+        """Callback wenn Passwort eingegeben wurde"""
+        if st.session_state["password"] == st.secrets["app_password"]:
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]  # Passwort nicht im State behalten
+        else:
+            st.session_state["password_correct"] = False
+
+    # Erstes Mal oder Passwort falsch
+    if "password_correct" not in st.session_state:
+        st.markdown("""
+        <div style="display: flex; justify-content: center; align-items: center; height: 60vh;">
+            <div style="text-align: center;">
+                <h1>🦅 Trading Journal</h1>
+                <p style="color: #888;">Bitte Passwort eingeben</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.text_input(
+                "Passwort", 
+                type="password", 
+                on_change=password_entered, 
+                key="password",
+                placeholder="Passwort eingeben..."
+            )
+        return False
+    
+    elif not st.session_state["password_correct"]:
+        st.markdown("""
+        <div style="display: flex; justify-content: center; align-items: center; height: 60vh;">
+            <div style="text-align: center;">
+                <h1>🦅 Trading Journal</h1>
+                <p style="color: #888;">Bitte Passwort eingeben</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.text_input(
+                "Passwort", 
+                type="password", 
+                on_change=password_entered, 
+                key="password",
+                placeholder="Passwort eingeben..."
+            )
+            st.error("❌ Falsches Passwort")
+        return False
+    
+    return True
+
+# Passwort prüfen - wenn falsch, stoppe hier
+if not check_password():
+    st.stop()
+
 # --- GOOGLE SHEETS SETUP ---
 SCOPES = [
     'https://www.googleapis.com/auth/spreadsheets',
